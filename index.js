@@ -19,6 +19,7 @@ async function run() {
 		await client.connect();
 		const database = client.db("emajohn");
 		const productCollection = database.collection("product");
+		const orderCollectin = database.collection("ordered");
 		// create a document to insert
 		// GET PRODUCT
 		app.get("/porducts", async (req, res) => {
@@ -39,6 +40,22 @@ async function run() {
 			res.send({ result, count });
 
 			console.log("Data loaded successfully", page, size);
+		});
+		// GET data by keys
+		app.post("/porducts/orderItems", async (req, res) => {
+			const keys = req.body;
+			const query = { key: { $in: keys } };
+			const orderItems = await productCollection.find(query).toArray();
+			console.log("hitted order items", keys);
+			res.json(orderItems);
+		});
+
+		// Order Info
+		app.post("/orderinfo", async (req, res) => {
+			const info = req.body;
+			const result = await orderCollectin.insertOne(info);
+			res.json(result);
+			console.log("User info added");
 		});
 	} finally {
 		// await client.close();
