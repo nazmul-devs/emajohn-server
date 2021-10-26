@@ -22,11 +22,23 @@ async function run() {
 		// create a document to insert
 		// GET PRODUCT
 		app.get("/porducts", async (req, res) => {
-			const result = await productCollection.find({}).toArray();
+			const page = Number(req.query.page);
+			const size = Number(req.query.size);
+			let result;
 			const count = await productCollection.find({}).count();
-			res.send({ count, result });
 
-			console.log("Data loaded successfully", count);
+			if (page >= 0) {
+				result = await productCollection
+					.find({})
+					.skip(page * size)
+					.limit(size)
+					.toArray();
+			} else {
+				result = await productCollection.find({}).toArray();
+			}
+			res.send({ result, count });
+
+			console.log("Data loaded successfully", page, size);
 		});
 	} finally {
 		// await client.close();
